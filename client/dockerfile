@@ -1,0 +1,35 @@
+FROM ubuntu:20.04
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+# Update and upgrade system
+RUN apt-get update && apt-get -y --fix-missing upgrade
+
+# Install necessary build tools
+RUN apt-get -y install build-essential \
+    cmake \
+    gcc \
+    g++ \
+    gdb \
+    valgrind \
+    git \
+    openjdk-8-jdk \
+    python3 \
+    python3-pip \
+    libboost-all-dev \
+    wget
+
+# Install Python packages
+RUN pip3 install networkx matplotlib
+
+# Install Maven 3.6.3
+RUN wget https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.6.3/apache-maven-3.6.3-bin.tar.gz && \
+    tar -xvf apache-maven-3.6.3-bin.tar.gz && \
+    mv apache-maven-3.6.3 /opt/ && \
+    rm apache-maven-3.6.3-bin.tar.gz
+
+# Add Maven to PATH
+ENV PATH="/opt/apache-maven-3.6.3/bin:$PATH"
+
+# Clean up
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
