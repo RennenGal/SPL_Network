@@ -8,5 +8,12 @@ public interface Connections<T> {
 
     void send(String channel, T msg);
 
-    void disconnect(int connectionId);
+    void disconnect(int connectionId) throws IOException;
+
+    // New functions outside the provided interface
+    void newConnection(int connectionId, ConnectionHandler<T> handler);
+
+    void subscribe(String channel, int connectionTd);
+
+    void unsubscribe(String channel, int connectionTd);
 }
