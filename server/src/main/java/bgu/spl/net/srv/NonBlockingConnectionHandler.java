@@ -119,5 +119,13 @@ public class NonBlockingConnectionHandler<T> implements ConnectionHandler<T> {
     @Override
     public void send(T msg) {
         //IMPLEMENT IF NEEDED
+        try {
+            ByteBuffer buffer = ByteBuffer.wrap(encdec.encode(msg));
+            writeQueue.add(buffer);
+            reactor.updateInterestedOps(chan, SelectionKey.OP_WRITE); // maybe add SelectionKey.OP_READ?
+        } catch (Exception e) {
+            close();
+            e.printStackTrace();
+        }
     }
 }
