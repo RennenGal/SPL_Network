@@ -48,4 +48,5 @@ public:
 	// Close down the connection properly.
 	void close();
 
+	bool receive(std::string& response);
 }; //class ConnectionHandler

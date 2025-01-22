@@ -9,10 +9,11 @@ import java.util.Map;
 
 public class StompMessagingProtocolImpl implements StompMessagingProtocol<String> {
     private Connections<String> connections;
+    private String username;
     private int connectionId;
     private boolean terminated = false;
     private final StompDatabase db = StompDatabase.getInstance();
-    private ConnectionHandler<String> connectionHandler = null;
+    private ConnectionHandler<String> connectionHandler;
     private Map<String, Integer> subscriptionsToId;
     private Map<Integer, String> idToSubscriptions;
     @Override
@@ -66,7 +67,7 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol<String
         if (db.isUserExist(username)) {
             if (!db.isUserValid(username, password)) {
                 sendError("ERROR\n" +
-                        "Invalid passcode\n\u0000");
+                        "Wrong password\n\u0000");
                 return;
             }
             if (db.isActiveUser(username)) {
@@ -75,6 +76,9 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol<String
                 return;
             }
         }
+        this.username = username;
+        db.addUser(username, password);
+        db.addActiveUser(username);
         connections.newConnection(connectionId, connectionHandler);
         connections.send(connectionId, "CONNECTED\nversion: 1.2\n\n\u0000");
     }
@@ -148,17 +152,15 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol<String
                 receipt = line.substring(8); // Extract receipt after "receipt:"
             }
         }
-        if (receipt != null) {
+        if (receipt == null) {
             if (id == Integer.MIN_VALUE) {
                 sendError("ERROR\n" +
                         "Missing id in SUBSCRIBE\n\u0000");
-//            connections.disconnect(connectionId);
                 return;
             }
             if (!idToSubscriptions.containsKey(id)) {
                 sendError("ERROR\n" +
                         "Not subscribed to this channel \n\u0000");
-//            connections.disconnect(connectionId);
                 return;
             }
             String channel = idToSubscriptions.remove(id);
@@ -170,14 +172,12 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol<String
                 sendError("ERROR\n" +
                         "receipt-id:"+receipt + "\n" +
                         "Missing id in SUBSCRIBE\n\u0000");
-//            connections.disconnect(connectionId);
                 return;
             }
             if (!idToSubscriptions.containsKey(id)) {
                 sendError("ERROR\n" +
                         "receipt-id:"+receipt + "\n" +
                         "Not subscribed to this channel \n\u0000");
-//            connections.disconnect(connectionId);
                 return;
             }
             String channel = idToSubscriptions.remove(id);
@@ -207,13 +207,11 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol<String
             if (destination == null) {
                 sendError("ERROR\n" +
                         "Missing destination in SEND\n\u0000");
-                //connections.disconnect(connectionId);
                 return;
             }
             if (!subscriptionsToId.containsKey(destination)) {
                 sendError("ERROR\n" +
                         "Not subscribed to this channel \n\u0000");
-                //connections.disconnect(connectionId);
                 return;
             }
             String msg = "MESSAGE\n" +
@@ -228,14 +226,12 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol<String
                 sendError("ERROR\n" +
                         "receipt-id:"+receipt + "\n" +
                         "Missing destination in SEND\n\u0000");
-                //connections.disconnect(connectionId);
                 return;
             }
             if (!subscriptionsToId.containsKey(destination)) {
                 sendError("ERROR\n" +
                         "receipt-id:"+receipt + "\n" +
                         "Not subscribed to this channel \n\u0000");
-                //connections.disconnect(connectionId);
                 return;
             }
             String msg = "MESSAGE\n" +
@@ -249,7 +245,6 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol<String
     }
 
     private void handleDisconnect(String[] lines) {
-        connections.disconnect(connectionId);
         terminated = true;
         String receipt = null;
         for (String line : lines) {
@@ -266,13 +261,15 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol<String
             message = "DISCONNECT\n" +
                     "receipt-id:"+ receipt + "\n\n\u0000";
         }
+        db.removeActiveUser(username);
         connections.send(connectionId, message);
         connections.disconnect(connectionId);
     }
 
     private void sendError(String s) {
         connections.send(connectionId, s);
-//        connections.disconnect(connectionId);
+        db.removeActiveUser(username);
+        connections.disconnect(connectionId);
     }
 
     @Override

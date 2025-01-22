@@ -13,6 +13,9 @@ add_executable(Assignment_3_JetBrains
         client/src/echoClient.cpp
         client/src/event.cpp
         client/src/StompClient.cpp
+        client/include/KeyboardHandler.h
+        client/src/KeyboardHandler.cpp
+        client/include/StompClient.h
 )
 
 # Locate Boost (specify required components)
