@@ -1,14 +1,9 @@
-
 #include "StompProtocol.h"
-
-
-
-const std::string StompProtocol::acceptVERSION = "1.2";
-const std::string StompProtocol::HOST = "stomp.cs.bgu.ac.il";
-
-std::string StompProtocol::connectFrame(const std::string& username, const std::string& password) {
-
-    std::string frame = "CONNECT\n";
+using namespace std;
+const string acceptVERSION = "1.2";
+const string HOST = "stomp.cs.bgu.ac.il";
+string StompProtocol::connectFrame(const string& username, const string& password) {
+    string frame = "CONNECT\n";
     frame += "accept-version:" + acceptVERSION + "\n";
     frame += "host:" + HOST + "\n";
     frame += "login:" + username + "\n";
@@ -19,8 +14,8 @@ std::string StompProtocol::connectFrame(const std::string& username, const std::
 }
 
 
-std::string StompProtocol::sendFrame(const std::string& destination, const std::string& message) {
-    std::string frame = "SEND\n";
+string StompProtocol::sendFrame(const string& destination, const string& message) {
+    string frame = "SEND\n";
     frame += "destination:" + destination + "\n";
     frame += "\n";
     frame += message;
@@ -28,27 +23,27 @@ std::string StompProtocol::sendFrame(const std::string& destination, const std::
     return frame;
 }
 
-std::string StompProtocol::subscribeFrame(const std::string& destination, int id) {
-    std::string frame = "SUBSCRIBE\n";
+string StompProtocol::subscribeFrame(const string& destination, int id) {
+    string frame = "SUBSCRIBE\n";
     frame += "destination:" + destination + "\n";
-    frame += "id:" + std::to_string(id) + "\n";
+    frame += "id:" + to_string(id) + "\n";
     frame += "\n";
     frame += '\0';
     return frame;
 }
 
 
-std::string StompProtocol::unsubscribeFrame(int id) {
-    std::string frame = "UNSUBSCRIBE\n";
-    frame += "id:" + std::to_string(id) + "\n";
+string StompProtocol::unsubscribeFrame(int id) {
+    string frame = "UNSUBSCRIBE\n";
+    frame += "id:" + to_string(id) + "\n";
     frame += "\n";
     frame += '\0';
     return frame;
 }
 
-std::string StompProtocol::disconnectFrame(int receiptId) {
-    std::string frame = "DISCONNECT\n";
-    frame += "receipt:" + std::to_string(receiptId) + "\n";
+string StompProtocol::disconnectFrame(int receiptId) {
+    string frame = "DISCONNECT\n";
+    frame += "receipt:" + to_string(receiptId) + "\n";
     frame += "\n";
     frame += '\0';
     return frame;

@@ -27,9 +27,19 @@ RUN wget https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.6.
     tar -xvf apache-maven-3.6.3-bin.tar.gz && \
     mv apache-maven-3.6.3 /opt/ && \
     rm apache-maven-3.6.3-bin.tar.gz
+# Install a newer version of CMake
+RUN apt-get remove -y cmake && \
+    wget https://github.com/Kitware/CMake/releases/download/v3.29.0/cmake-3.29.0-linux-x86_64.tar.gz && \
+    tar -xvzf cmake-3.29.0-linux-x86_64.tar.gz && \
+    mv cmake-3.29.0-linux-x86_64 /opt/cmake-3.29 && \
+    ln -s /opt/cmake-3.29/bin/cmake /usr/bin/cmake && \
+    rm cmake-3.29.0-linux-x86_64.tar.gz
 
 # Add Maven to PATH
 ENV PATH="/opt/apache-maven-3.6.3/bin:$PATH"
+
+# Set working directory
+WORKDIR /project
 
 # Clean up
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*

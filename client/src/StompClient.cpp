@@ -1,102 +1,86 @@
 #include <iostream>
 #include <string>
-#include <cstdlib>
 #include "ConnectionHandler.h"
 #include "StompProtocol.h"
+using namespace std;
 
 class StompClient {
-private:
 	bool LoggedIn = false;
 	ConnectionHandler *connectionHandler;
 
-	void processResponse(const std::string& response) {
-		if (response.find("CONNECTED") != std::string::npos) {
-			std::cout << "Login successful" << std::endl;
-			isLoggedIn = true;
-		} else if (response.find("ERROR") != std::string::npos) {
-			if (response.find("Wrong password") != std::string::npos) {
-				std::cout << "Wrong password" << std::endl;
+	void processResponse(const string& response) {
+		if (response.find("CONNECTED") != string::npos) {
+			cout << "Login successful" << endl;
+			LoggedIn = true;
+		} else if (response.find("ERROR") != string::npos) {
+			if (response.find("Wrong password") != string::npos) {
+				cout << "Wrong password" << endl;
 			}
 		}
 	}
 
 public:
 
-	StompClient(std::string host, short port) {
+	StompClient(const string& host, const short port) {
 		connectionHandler = new ConnectionHandler(host, port);
 	}
 	~StompClient() {
 		delete connectionHandler;
 	}
 
-	void subscribe(const std::string& channelName) {
-		if (!isLoggedIn) {
-			std::cout << "You need to logged in order to subscribe" << std::endl;
+	void subscribe(const string& channelName, const int id) const
+	{
+		if (!LoggedIn) {
+			cout << "You need to logged in order to subscribe" << endl;
 			return;
 		}
-		std::string frame = StompProtocol::subscribeFrame(channelName,int id);
+		const string frame = StompProtocol::subscribeFrame(channelName,id);
 
-		if (!connectionHandler->sendBytes(frame.c_str(), frame.length())) {
-			std::cerr << "Failed to send SUBSCRIBE frame" << std::endl;
+		if (!connectionHandler->sendBytes(frame.c_str(), static_cast<int>(frame.length()))) {
+			cerr << "Failed to send SUBSCRIBE frame" << endl;
 			return;
 		}
-		std::cout << "Subscribed to " << channelName << std::endl;
+		cout << "Subscribed to " << channelName << endl;
 	}
 
-        void unsubscribe(const std::string& channelName) {
-		if (!isLoggedIn) {
-			std::cout << "You need to logged in order to usubscribe" << std::endl;
+    void unsubscribe(const int id, const string& channelName) const {
+		if (!LoggedIn) {
+			cout << "You need to logged in order to usubscribe" << endl;
 			return;
 		}
-		std::string frame = StompProtocol::unsubscribeFrame(channelName);
-		if (!connectionHandler->sendBytes(frame.c_str(), frame.length())) {
-			std::cerr << "Failed to send UNSUBSCRIBE frame" << std::endl;
+		const string frame = StompProtocol::unsubscribeFrame(id);
+		if (!connectionHandler->sendBytes(frame.c_str(), static_cast<int>(frame.length()))) {
+			cerr << "Failed to send UNSUBSCRIBE frame" << endl;
 			return;
 		}
-		std::cout << "Unsubscribed from " << channelName << std::endl;
+		cout << "Unsubscribed from " << channelName << endl;
 	}
 
-	void disconnect() {
-		if (!isLoggedIn) {
-			std::cout << "You must be logged in to disconnect" << std::endl;
+	void disconnect(const int id) {
+		if (!LoggedIn) {
+			cout << "You must be logged in to disconnect" << endl;
 			return;
 		}
-		std::string frame = StompProtocol::createDisconnectFrame();
-		if (!connectionHandler->sendBytes(frame.c_str(), frame.length())) {
-			std::cerr << "Failed to send DISCONNECT frame" << std::endl;
+		const string frame = StompProtocol::disconnectFrame(id);
+		if (!connectionHandler->sendBytes(frame.c_str(), static_cast<int>(frame.length()))) {
+			cerr << "Failed to send DISCONNECT frame" << endl;
 			return;
 		}
+		cout << "Disconnected" << endl;
+		LoggedIn = false;
+	}
 
-		std::cout << "Disconnected" << std::endl;
-		isLoggedIn = false;
+	bool sendFrame(const string& destination, const string& frame) const
+	{
+		
+		return false;
 	}
 };
 
-
-void disconnect() {
-	if (!isLoggedIn) {
-		std::cout << "You must be logged in to disconnect" << std::endl;
-		return;
-	}
-	std::string frame = StompProtocol::disconnectFrame();
-	if (!connectionHandler->sendBytes(frame.c_str(), frame.length())) {
-		std::cerr << "Failed to send DISCONNECT frame" << std::endl;
-		return;
-	}
-	std::cout << "Disconnected" << std::endl;
-	isLoggedIn = false;
-    }
- }
 
 
 
 int main(int argc, char *argv[]) {
 	// TODO: implement the STOMP client
-
-
-
-
-
-
 
 }
