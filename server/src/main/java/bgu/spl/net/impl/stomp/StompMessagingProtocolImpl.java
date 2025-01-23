@@ -1,5 +1,4 @@
 package bgu.spl.net.impl.stomp;
-
 import bgu.spl.net.api.StompMessagingProtocol;
 import bgu.spl.net.srv.ConnectionHandler;
 import bgu.spl.net.srv.Connections;
@@ -16,6 +15,7 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol<String
     private ConnectionHandler<String> connectionHandler;
     private Map<String, Integer> subscriptionsToId;
     private Map<Integer, String> idToSubscriptions;
+
     @Override
     public void start(int connectionId, Connections<String> connections, ConnectionHandler<String> connectionHandler) {
         this.connections = connections;
@@ -24,6 +24,7 @@ public class StompMessagingProtocolImpl implements StompMessagingProtocol<String
         this.subscriptionsToId = new HashMap<>();
         this.idToSubscriptions = new HashMap<>();
     }
+
 
     @Override
     public void process(String message) {

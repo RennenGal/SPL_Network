@@ -7,10 +7,12 @@ public class StompDatabase {
     private final ConcurrentHashMap<String, String> users;
     private final ConcurrentHashMap<String, String> activeUsers;
     private final AtomicInteger messageId;
+    private final AtomicInteger connectionId;
     private StompDatabase(){
         users = new ConcurrentHashMap<>();
         activeUsers = new ConcurrentHashMap<>();
         messageId = new AtomicInteger(0);
+        connectionId = new AtomicInteger(0);
     }
     private static class StompDatabaseHolder{
         private static final StompDatabase instance = new StompDatabase();
@@ -38,5 +40,8 @@ public class StompDatabase {
     }
     public int getNextMessageId(){
         return messageId.incrementAndGet();
+    }
+    public int generateConnectionId(){
+        return connectionId.incrementAndGet();
     }
 }
